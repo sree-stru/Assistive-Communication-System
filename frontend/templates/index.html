@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistive Communication System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤝 Assistive Communication System</h1>
+            <p>Real-time Hand Gesture Recognition for Speech and Hearing Impaired</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Video Feed Section -->
+            <div class="video-section">
+                <h2>Live Camera Feed</h2>
+                <div class="video-container">
+                    <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Video Feed">
+                </div>
+                <div class="gesture-display">
+                    <h3>Current Gesture:</h3>
+                    <p id="current-gesture">No hand detected</p>
+                </div>
+            </div>
+
+            <!-- Text Accumulation Section -->
+            <div class="text-section">
+                <h2>Communication Output</h2>
+                <div class="text-display">
+                    <textarea id="accumulated-text" readonly placeholder="Recognized gestures will appear here..."></textarea>
+                </div>
+                
+                <div class="controls">
+                    <button id="add-btn" class="btn btn-primary">➕ Add Gesture</button>
+                    <button id="space-btn" class="btn btn-secondary">⎵ Add Space</button>
+                    <button id="speak-btn" class="btn btn-success">🔊 Speak</button>
+                    <button id="clear-btn" class="btn btn-danger">🗑️ Clear</button>
+                </div>
+
+                <div class="info-section">
+                    <h3>📋 Gesture Guide</h3>
+                    <ul>
+                        <li><strong>Fist:</strong> YES</li>
+                        <li><strong>One Finger:</strong> I</li>
+                        <li><strong>Two Fingers:</strong> NEED</li>
+                        <li><strong>Three Fingers:</strong> HELP</li>
+                        <li><strong>Four Fingers:</strong> WAIT</li>
+                        <li><strong>Open Palm (5 Fingers):</strong> HELLO</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Mini Project - Assistive Communication System</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
