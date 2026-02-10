@@ -20,8 +20,7 @@ Mini project/
 │   ├── gesture_recognition.py  # Hand gesture detection and recognition logic
 │   ├── collect_data.py      # Optional: For training custom gestures
 │   ├── requirements.txt     # Python dependencies
-│   ├── models/              # Trained models will be saved here
-│   └── dataset/             # Training data will be saved here
+│   └── models/              # Trained models will be saved here
 │
 ├── frontend/                 # Frontend files
 │   ├── templates/
@@ -32,6 +31,17 @@ Mini project/
 │
 └── README.md                 # This file
 ```
+
+## 📥 Dataset
+
+The training dataset is stored separately to keep the repository size manageable. 
+
+**Download the dataset here:** [https://data.mendeley.com/datasets/w7fgy7jvs8/3](https://data.mendeley.com/datasets/w7fgy7jvs8/3)
+
+After downloading:
+1. Extract the dataset folder
+2. Place it in `backend/dataset/` directory
+3. Make sure the folder structure matches the expected format (see dataset README for details)
 
 ## 📄 What Each File Does
 

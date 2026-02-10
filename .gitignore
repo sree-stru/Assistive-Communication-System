@@ -42,12 +42,13 @@ models/*.pkl
 models/*.pickle
 
 # Dataset - Large files (optional - uncomment if you want to exclude datasets)
-# dataset/
-# *.jpg
-# *.jpeg
-# *.png
-# *.mp4
-# *.avi
+dataset/
+backend/dataset/
+*.jpg
+*.jpeg
+*.png
+*.mp4
+*.avi
 
 # IDE
 .vscode/
