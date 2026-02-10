@@ -34,13 +34,22 @@ Mini project/
 
 ## 📥 Dataset
 
-The training dataset is stored separately to keep the repository size manageable. 
+The training datasets are stored separately to keep the repository size manageable.
 
-**Download the dataset here:** [https://data.mendeley.com/datasets/w7fgy7jvs8/3](https://data.mendeley.com/datasets/w7fgy7jvs8/3)
+### 1) Digits and Alphabets (dat.zip)
+**Download link:** [https://drive.google.com/open?id=1keWr7-X8aR4YMotY2m8SlEHlyruDDdVi](https://drive.google.com/open?id=1keWr7-X8aR4YMotY2m8SlEHlyruDDdVi)
+
+After downloading:
+1. Download `data.zip` from the Google Drive link
+2. Extract `data.zip`
+3. Place the extracted folder inside `backend/dataset/Indian/`
+
+### 2) Images for Phrases
+**Download link:** [https://data.mendeley.com/datasets/w7fgy7jvs8/3](https://data.mendeley.com/datasets/w7fgy7jvs8/3)
 
 After downloading:
 1. Extract the dataset folder
-2. Place it in `backend/dataset/` directory
+2. Place it inside `backend/dataset/images for phrases/`
 3. Make sure the folder structure matches the expected format (see dataset README for details)
 
 ## 📄 What Each File Does
