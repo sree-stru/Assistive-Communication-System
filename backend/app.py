@@ -27,6 +27,7 @@ tts_engine.setProperty('volume', 1.0)
 camera = None
 current_gesture = "No hand detected"
 accumulated_text = ""
+last_spoken_gesture = None  # Track last spoken gesture to prevent repetition
 
 def get_camera():
     """Initialize camera if not already initialized"""
@@ -37,9 +38,35 @@ def get_camera():
         camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
     return camera
 
+# Add this global variable at top with others
+is_speaking = False
+
+
+def speak_gesture(text):
+    """Speak gesture text safely (no overlapping speech)"""
+    global is_speaking
+
+    if is_speaking:
+        return  # Don't speak if already speaking
+
+    def speak():
+        global is_speaking
+        try:
+            is_speaking = True
+            tts_engine.say(text)
+            tts_engine.runAndWait()
+        except Exception as e:
+            print(f"TTS Error: {e}")
+        finally:
+            is_speaking = False
+
+    thread = threading.Thread(target=speak)
+    thread.daemon = True
+    thread.start()
+
 def generate_frames():
     """Generator function to yield video frames"""
-    global current_gesture
+    global current_gesture, last_spoken_gesture
     
     cam = get_camera()
     
@@ -53,7 +80,20 @@ def generate_frames():
         
         # Recognize gesture
         processed_frame, gesture_text = gesture_recognizer.recognize_gesture(frame)
+        print("MODEL OUTPUT:", gesture_text)
         current_gesture = gesture_text
+        
+        # Speak gesture if it's new (different from last spoken gesture)
+        # and not a "no hand" or "unknown" state
+        if (gesture_text != "No hand detected" and 
+            gesture_text != "Unknown" and 
+            gesture_text != last_spoken_gesture and not is_speaking):
+            speak_gesture(gesture_text)
+            last_spoken_gesture = gesture_text
+        
+        # Reset if no hand detected
+        if gesture_text == "No hand detected":
+            last_spoken_gesture = None
         
         # Add text to frame
         cv2.putText(
