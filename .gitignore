@@ -1,0 +1,89 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Virtual Environment
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Machine Learning / AI Models
+*.h5
+*.pkl
+*.pickle
+*.pt
+*.pth
+*.onnx
+*.pb
+*.tflite
+models/*.h5
+models/*.pkl
+models/*.pickle
+
+# Dataset - Large files (optional - uncomment if you want to exclude datasets)
+dataset/
+backend/dataset/
+*.jpg
+*.jpeg
+*.png
+*.mp4
+*.avi
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Flask
+instance/
+.webassets-cache
+
+# Node.js (if you add any frontend tooling)
+node_modules/
+package-lock.json
+yarn.lock
