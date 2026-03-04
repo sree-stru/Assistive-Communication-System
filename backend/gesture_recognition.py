@@ -1,9 +1,9 @@
 """
 Advanced Gesture Recognition Module
 Supports:
-- Indian Alphabets & Digits Model (1-hand)
-- Phrases Model (1-hand & 2-hand mixed)
-- Confidence-based prediction
+- Indian Alphabets & Digits Model (2-hand, 84 features)
+- Proper scale normalization
+- Stable prediction pipeline
 """
 
 import cv2
@@ -15,7 +15,9 @@ import os
 
 class GestureRecognizer:
     def __init__(self):
+        # ----------------------------
         # MediaPipe Hands
+        # ----------------------------
         self.mp_hands = mp.solutions.hands
         self.hands = self.mp_hands.Hands(
             static_image_mode=False,
@@ -25,99 +27,59 @@ class GestureRecognizer:
         )
         self.mp_draw = mp.solutions.drawing_utils
 
+        # ----------------------------
         # Models
+        # ----------------------------
         self.indian_model = None
         self.indian_labels = None
-        self.phrases_model = None
-        self.phrases_labels = None
-
-        # Confidence threshold
-        self.phrase_conf_threshold = 0.60
 
         self.load_models()
 
     # ---------------------------------------------------
-    # LOAD MODELS
+    # LOAD MODEL
     # ---------------------------------------------------
     def load_models(self):
         try:
-            # Indian model
             if os.path.exists("models/isl_model.pkl") and os.path.exists("models/label_encoder.pkl"):
                 with open("models/isl_model.pkl", "rb") as f:
                     self.indian_model = pickle.load(f)
+
                 with open("models/label_encoder.pkl", "rb") as f:
                     self.indian_labels = pickle.load(f)
-                print("✅ Indian model loaded")
-            else:
-                print("⚠ Indian model files not found")
 
-            # Phrase model
-            if os.path.exists("models/phrases_model.pkl") and os.path.exists("models/phrases_labels.pkl"):
-                with open("models/phrases_model.pkl", "rb") as f:
-                    self.phrases_model = pickle.load(f)
-                with open("models/phrases_labels.pkl", "rb") as f:
-                    self.phrases_labels = pickle.load(f)
-                print("✅ Phrases model loaded")
+                print("✅ Indian model loaded (84 features)")
             else:
-                print("⚠ Phrase model files not found")
+                print("⚠ Model files not found.")
 
         except Exception as e:
             print("❌ Model loading error:", e)
 
     # ---------------------------------------------------
-    # EXTRACT SINGLE HAND LANDMARKS (42 features)
+    # NORMALIZE HAND LANDMARKS (Same as Training)
     # ---------------------------------------------------
-    def extract_single_hand(self, hand_landmarks):
+    def normalize_landmarks(self, hand_landmarks):
         landmarks = []
+
+        base_x = hand_landmarks.landmark[0].x
+        base_y = hand_landmarks.landmark[0].y
+
         for lm in hand_landmarks.landmark:
-            landmarks.extend([lm.x, lm.y])
-        return landmarks
+            landmarks.append(lm.x - base_x)
+            landmarks.append(lm.y - base_y)
 
-    # ---------------------------------------------------
-    # PREDICTION LOGIC
-    # ---------------------------------------------------
-    def predict_with_models(self, combined_landmarks):
-        features = np.array(combined_landmarks).reshape(1, -1)
+        landmarks = np.array(landmarks)
 
-        phrase_label = None
-        phrase_conf = 0
+        max_value = np.max(np.abs(landmarks))
+        if max_value != 0:
+            landmarks = landmarks / max_value
 
-        # ----------------------------
-        # Try Phrase Model (84 features)
-        # ----------------------------
-        if self.phrases_model is not None and self.phrases_labels is not None:
-            try:
-                probs = self.phrases_model.predict_proba(features)
-                phrase_conf = float(np.max(probs))
-                pred = int(self.phrases_model.predict(features)[0])
-                phrase_label = self.phrases_labels.inverse_transform([pred])[0]
-            except Exception as e:
-                print("Phrase model error:", e)
-
-        # If confident → return phrase
-        if phrase_label and phrase_conf >= self.phrase_conf_threshold:
-            print("PHRASE MODEL OUTPUT:", phrase_label, "Confidence:", phrase_conf)
-            return str(phrase_label)
-
-        # ----------------------------
-        # Fallback to Indian Model (first 42 features only)
-        # ----------------------------
-        if self.indian_model is not None and self.indian_labels is not None:
-            try:
-                single_hand_features = np.array(combined_landmarks[:42]).reshape(1, -1)
-                pred = int(self.indian_model.predict(single_hand_features)[0])
-                label = self.indian_labels.inverse_transform([pred])[0]
-                print("INDIAN MODEL OUTPUT:", label)
-                return str(label)
-            except Exception as e:
-                print("Indian model error:", e)
-
-        return "Unknown"
+        return landmarks.tolist()
 
     # ---------------------------------------------------
     # MAIN FRAME PROCESSING
     # ---------------------------------------------------
     def recognize_gesture(self, frame):
+
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = self.hands.process(rgb_frame)
 
@@ -125,30 +87,47 @@ class GestureRecognizer:
 
         if results.multi_hand_landmarks:
 
-            # Draw landmarks
-            for hand_landmarks in results.multi_hand_landmarks:
+            combined_landmarks = []
+
+            # Sort hands left-to-right
+            sorted_hands = sorted(
+               results.multi_hand_landmarks,
+               key=lambda hand: hand.landmark[0].x
+       )
+
+            for hand_landmarks in sorted_hands:
+                # Draw landmarks
                 self.mp_draw.draw_landmarks(
                     frame,
                     hand_landmarks,
                     self.mp_hands.HAND_CONNECTIONS
                 )
 
-            combined_landmarks = []
+                # Normalize and extract features
+                normalized = self.normalize_landmarks(hand_landmarks)
+                combined_landmarks.extend(normalized)
 
-            # Extract detected hands
-            for hand_landmarks in results.multi_hand_landmarks:
-                combined_landmarks.extend(
-                    self.extract_single_hand(hand_landmarks)
-                )
-
-            # 🔥 Always make feature size 84
+            # If only 1 hand detected → pad second hand
             if len(combined_landmarks) == 42:
                 combined_landmarks.extend([0] * 42)
 
-            # If more than 2 hands somehow detected, trim
+            # Ensure exactly 84 features
             combined_landmarks = combined_landmarks[:84]
 
-            gesture_text = self.predict_with_models(combined_landmarks)
+            # Convert to numpy
+            features = np.array(combined_landmarks).reshape(1, -1)
+
+            # Predict
+            if self.indian_model is not None:
+                try:
+                    pred = int(self.indian_model.predict(features)[0])
+                    label = self.indian_labels.inverse_transform([pred])[0]
+
+                    gesture_text = str(label)
+
+                except Exception as e:
+                    print("Prediction error:", e)
+                    gesture_text = "Prediction Error"
 
         return frame, gesture_text
 
