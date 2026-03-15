@@ -4,7 +4,7 @@ import numpy as np
 import mediapipe as mp
 
 
-def load_dataset(dataset_path='dataset/Indian'):
+def load_dataset(dataset_path='data/data'):
     """
     Load images from dataset/Indian/ folder and extract hand landmarks.
     Each subfolder name represents a label (A, B, 1, 2, etc.)

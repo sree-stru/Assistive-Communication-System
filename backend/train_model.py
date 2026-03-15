@@ -1,72 +1,67 @@
 import os
 import cv2
-import mediapipe as mp
 import numpy as np
 import pickle
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
-from tqdm import tqdm
 
-# Dataset path
-DATASET_PATH = "dataset/indian"
-MODEL_SAVE_PATH = "models/isl_model.pkl"
-LABEL_SAVE_PATH = "models/label_encoder.pkl"
+DATASET_PATH = r"C:\Users\LVRSS\Assistive-Communication-System\backend\data\data"
 
-# MediaPipe setup
-mp_hands = mp.solutions.hands
-hands = mp_hands.Hands(static_image_mode=True, max_num_hands=1)
+print("Loading dataset...")
 
-X = []
-y = []
+if not os.path.exists(DATASET_PATH):
+    print("❌ Dataset path not found!")
+    exit()
 
-print("🔄 Processing dataset...")
+data = []
+labels = []
 
-for label_folder in os.listdir(DATASET_PATH):
-    folder_path = os.path.join(DATASET_PATH, label_folder)
+folders = os.listdir(DATASET_PATH)
+print("Found folders:", folders)
+
+for folder in folders:
+    folder_path = os.path.join(DATASET_PATH, folder)
 
     if not os.path.isdir(folder_path):
         continue
 
-    for image_file in tqdm(os.listdir(folder_path), desc=f"Processing {label_folder}"):
-        image_path = os.path.join(folder_path, image_file)
-        image = cv2.imread(image_path)
+    print("Reading folder:", folder)
 
-        if image is None:
+    files = os.listdir(folder_path)
+    print("Number of files:", len(files))
+
+    for file in files:
+        file_path = os.path.join(folder_path, file)
+
+        img = cv2.imread(file_path)
+
+        if img is None:
             continue
 
-        rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        results = hands.process(rgb)
+        img = cv2.resize(img, (64, 64))
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        img = img.flatten()
 
-        if results.multi_hand_landmarks:
-            for hand_landmarks in results.multi_hand_landmarks:
-                landmarks = []
-                for lm in hand_landmarks.landmark:
-                    landmarks.extend([lm.x, lm.y])
+        data.append(img)
+        labels.append(folder)
 
-                X.append(landmarks)
-                y.append(label_folder)   # 🔥 IMPORTANT: use folder name
+print("Total samples loaded:", len(data))
 
-hands.close()
+if len(data) == 0:
+    print("❌ No images found.")
+    exit()
 
-X = np.array(X)
-y = np.array(y)
+data = np.array(data)
 
-print("📊 Encoding labels...")
 le = LabelEncoder()
-y_encoded = le.fit_transform(y)
+labels_encoded = le.fit_transform(labels)
 
 print("Training model...")
-model = RandomForestClassifier(n_estimators=200)
-model.fit(X, y_encoded)
 
-# Save model
-os.makedirs("models", exist_ok=True)
+model = RandomForestClassifier(n_estimators=100)
+model.fit(data, labels_encoded)
 
-with open(MODEL_SAVE_PATH, "wb") as f:
-    pickle.dump(model, f)
+with open("model.p", "wb") as f:
+    pickle.dump({"model": model, "label_encoder": le}, f)
 
-with open(LABEL_SAVE_PATH, "wb") as f:
-    pickle.dump(le, f)
-
-print("✅ Model trained and saved successfully!")
-print("Classes:", le.classes_)
+print("✅ Training complete.")
