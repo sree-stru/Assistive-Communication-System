@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.env
+.venv/
+venv/
+*.log
+.DS_Store
+.vscode/
+
+# Keep the trained models for a ready-to-run repository
+!models/sign_landmark_model.keras
+!models/hand_landmarker.task
+
+# Exclude large raw data files
+*.npy
+data/dataset/
