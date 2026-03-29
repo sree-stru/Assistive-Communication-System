@@ -3,7 +3,10 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+# Environment / Secrets
 .env
+.env.local
+
 .venv/
 venv/
 *.log
@@ -17,3 +20,15 @@ venv/
 # Exclude large raw data files
 *.npy
 data/dataset/
+
+# Scratch / debug files
+api_err.txt
+available_models.txt
+test_typo_out.txt
+test_cam.py
+test_typo.py
+test_explicit_err_file.py
+test_explicit_error.py
+list_models.py
+debug_train_1.jpg
+sample_check.jpg

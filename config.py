@@ -32,3 +32,7 @@ LANDMARK_INPUT_SIZE = 42 # 21 landmarks * (x, y)
 CONFIDENCE_THRESHOLD = 0.60
 PREDICTION_DELAY_FRAMES = 10
 MAX_HANDS = 2
+
+# Gemini AI Integration
+# Set GEMINI_API_KEY as an environment variable (see .env.example)
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
